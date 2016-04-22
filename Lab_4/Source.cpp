@@ -1,8 +1,10 @@
 #include<iostream>
 using namespace std;
-typedef double(*Formula)(int, double, double, double);
+typedef double(*Formula)(int, double, double);
 bool IsDataValid(double, double, double, int);
-double FormulaOfAverageRectangle(int, double, double, double);
+double DualConversion(double, double, double, int, Formula);
+double FormulaOfAverageRectangle(int, double, double);
+double FormulaOfRightRectangle(int, double, double);
 int main()
 {
 	double a, b, eps;
@@ -19,13 +21,38 @@ int main()
 		cin >> n;
 		if (IsDataValid(a, b, eps, n))break;
 		system("cls");
-		system("pause");
 	}
-	Formula formula = FormulaOfAverageRectangle;
-	cout << "Integral for n and Integral for 2*n:\n";
-	formula(n, a, b, eps);
+	Formula formula = FormulaOfRightRectangle;
+	cout << "result for Right Rectangle:\n";
+	cout << DualConversion(eps, a, b, n, formula) << endl;
+	cout << "result for Average Rectangle:\n";
+	formula = FormulaOfAverageRectangle;
+	cout << DualConversion(eps, a, b, n, formula);
 	system("pause");
 	return 0;
+}
+double FormulaOfRightRectangle(int n, double a, double b)
+{
+	double Integral = 0, x = 0;
+	double h = (b - a) / n;
+	for (int i = 0; i <= n; i++)
+	{
+		x = a + i*h;
+		Integral = h*(sin(x) / x);
+	}
+	return Integral;
+}
+double DualConversion(double eps, double a, double b, int n, Formula formula)
+{
+	double IntegralForN = 0, IntegralFor2N = 0;
+	while (fabs(IntegralForN - IntegralFor2N) > eps)
+	{
+		IntegralForN = formula(n, a, b);
+		IntegralFor2N = formula(2*n, a, b);
+		n *= 2;
+	}
+	double Integral = formula(n, a, b);
+	return Integral;
 }
 bool IsDataValid(double a, double b, double eps, int n)
 {
@@ -33,29 +60,14 @@ bool IsDataValid(double a, double b, double eps, int n)
 	else cout << "Enter: a<b, 0<eps<1, n>0\n"; system("pause");
 	return 0;
 }
-double FormulaOfAverageRectangle(int n, double a, double b, double eps)
+double FormulaOfAverageRectangle(int n, double a, double b)
 {
-	double IntegralForN = 0, IntegralFor2N = 0, x = 0;
+	double Integral = 0, x = 0;
 	double h = (b - a) / n;
-	while (true)
+	for (int i = 0; i < n; i++)
 	{
-		h = (b - a) / n;
-		IntegralForN = 0, IntegralFor2N = 0;
-		for (int i = 0; i < n; i++)
-		{
-			x = a + i*h;
-			IntegralForN += h*(sin(x + h / 2) / (x + h / 2));
-		}
-		x = 0;
-		for (int i = 0; i < 2 * n; i++)
-		{
-			h = (b - a) / n;
-			x = a + i*h / 2;
-			IntegralFor2N += h / 2 * (sin(x + h / 4) / (x + h / 4));
-		}
-		if (fabs(IntegralForN - IntegralFor2N) < eps)break;
-		else  n *= 2;
+		x = a + i*h;
+		Integral = h*(sin(x + h / 2) / (x + h / 2));
 	}
-	cout << IntegralForN << endl << IntegralFor2N;
-	return IntegralForN; IntegralFor2N;
+	return Integral;
 }
